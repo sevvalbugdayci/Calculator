@@ -1,30 +1,16 @@
 const storageController = (function () {
-
-
-
-
 })();
-
-
-
-
 const ProductController = (function () {
-
-
     const Product = function (id,name,price) {
         this.id = id;
         this.name = name;
         this.price = price;
     }
-
-
     const data = {
         products : [],
         selectedProduct : null,
         totalPrice:0
     }
-
-
     return {
 
         getProducts : function () {
@@ -42,6 +28,14 @@ const ProductController = (function () {
                 }
             })
             return product;
+        },
+
+        setCurrentProduct : function (product) {
+            data.selectedProduct = product;
+        },
+
+        getCurrentProduct : function () {
+            return data.selectedProduct;
         },
 
         addProduct : function (name,price) {
@@ -68,31 +62,23 @@ const ProductController = (function () {
         }
 
     }
-
-
-
-
 })();
-
-
-
 const UIController = (function () {
-
     const Selectors = {
         productList : "#item-list",
         addBtn : '.addBtn',
+        updateBtn : '.updateBtn',
+        deleteBtn : '.deleteBtn',
+        cancelBtn : '.cancelBtn',
         productName : '#productName',
         productPrice : '#productPrice',
         productCard : '#productCard',
         totalTL : '#total-tl',
         totalDolar : "#total-dolar"
     }
-
     return {
         createProductList : function (products) {
             let html = '';
-
-
             products.forEach(prd => {
                html += `<tr>
                 <td>${prd.id}</td>
@@ -104,8 +90,6 @@ const UIController = (function () {
             </tr>`;
 
             });
-
-
             document.querySelector(Selectors.productList).innerHTML = html;
         },
 
@@ -140,30 +124,42 @@ const UIController = (function () {
         showTotal : function (total) {
             document.querySelector(Selectors.totalDolar).textContent = total;
             document.querySelector(Selectors.totalTL).textContent = total * 4.5;
+        },
+        addProductToForm : function () {
+            const selectedProduct = ProductController.getCurrentProduct();
+            document.querySelector(Selectors.productName).value = selectedProduct.name;
+            document.querySelector(Selectors.productPrice).value = selectedProduct.price
+        },
+        addingState : function () {
+            UIController.clearInputs();
+            document.querySelector(Selectors.addBtn).style.display = 'inline';
+            document.querySelector(Selectors.updateBtn).style.display = 'none';
+            document.querySelector(Selectors.deleteBtn).style.display = 'none';
+            document.querySelector(Selectors.cancelBtn).style.display = 'none';
+
+        },
+        editState : function (tr) {
+
+            const parent = tr.parentNode;
+            for(let i=0 ; i < parent.children.length;i++) {
+                parent.children[i].classList.remove('bg-warning');
+            }
+
+            tr.classList.add('bg-warning');
+            document.querySelector(Selectors.addBtn).style.display = 'none';
+            document.querySelector(Selectors.updateBtn).style.display = 'inline';
+            document.querySelector(Selectors.deleteBtn).style.display = 'inline';
+            document.querySelector(Selectors.cancelBtn).style.display = 'inline';
         }
-
     }
-
-
-
 })();
 
-
-
-
 const App = (function (ProductCtrl,UICtrl) {
-
     const UISelectors = UIController.getSelectors();
-
     const loadEventListeners = function () {
-
         document.querySelector(UISelectors.addBtn).addEventListener("click",productAddSubmit);
-
-
         document.querySelector(UISelectors.productList).addEventListener("click",productEditSubmit);
-
     }
-
     const productAddSubmit = function (e) {
 
         const productName = document.querySelector(UISelectors.productName).value;
@@ -179,9 +175,6 @@ const App = (function (ProductCtrl,UICtrl) {
 
              UIController.clearInputs();
          }
-
-
-
         e.preventDefault()
     }
 
@@ -190,18 +183,20 @@ const App = (function (ProductCtrl,UICtrl) {
 
         if(e.target.classList.contains('edit-product')) {
             const id = e.target.parentNode.previousElementSibling.previousElementSibling.previousElementSibling.textContent;
-
             const product = ProductCtrl.getProductById(id);
+            ProductCtrl.setCurrentProduct(product);
+            UICtrl.addProductToForm();
+            UICtrl.editState();
+
         }
-
-
-
 
         e.preventDefault();
     }
 
 return {
     init : function () {
+
+       UICtrl.addingState();
        const products = ProductCtrl.getProducts();
        if(products.length == 0) {
            UICtrl.hideCard();
@@ -211,10 +206,5 @@ return {
        loadEventListeners();
     }
 }
-
-
-
 })(ProductController,UIController);
-
-
 App.init()
