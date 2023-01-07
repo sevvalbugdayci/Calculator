@@ -1,6 +1,35 @@
 
 const StorageController = (function () {
 
+
+
+    return {
+        storeProduct : function (product) {
+            let products;
+            if(localStorage.getItem('products') === null) {
+                products = [];
+                products.push(product);
+
+                localStorage.setItem('products',JSON.stringify(product));
+            } else {
+
+                products = JSON.stringify(products = localStorage.getItem('products')) ;
+                products.push(product);
+            }
+            localStorage.setItem('products',JSON.stringify(product));
+        },
+        getProducts : function () {
+            let products;
+            if(localStorage.getItem('products') == null) {
+                products = [];
+            } else {
+                products = JSON.parse(localStorage.getItem('products'));
+            }
+
+            return products;
+        }
+    }
+
 })();
 
 
@@ -14,7 +43,7 @@ const ProductController = (function () {
     }
 
     const data = {
-        products: [],
+        products: StorageController.getProducts(),
         selectedProduct: null,
         totalPrice: 0
     }
@@ -227,7 +256,7 @@ const UIController = (function () {
 
 
 
-const App = (function (ProductCtrl, UICtrl) {
+const App = (function (ProductCtrl, UICtrl,StorageCtrl) {
 
     const UISelectors = UICtrl.getSelectors();
 
@@ -257,6 +286,9 @@ const App = (function (ProductCtrl, UICtrl) {
 
 
             UICtrl.addProduct(newProduct);
+
+
+            StorageCtrl.storeProduct(newProduct);
 
 
             const total = ProductCtrl.getTotal();
@@ -357,6 +389,6 @@ const App = (function (ProductCtrl, UICtrl) {
     }
 
 
-})(ProductController, UIController);
+})(ProductController, UIController,StorageController);
 
 App.init();
