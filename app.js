@@ -71,6 +71,13 @@ const ProductController = (function () {
 
           return product;
         },
+        deleteProduct : function (product) {
+            data.products.forEach(function (prd,index) {
+                if(prd.id == product.id) {
+                    data.products.splice(index, 1);
+                }
+            })
+        },
         getTotal: function () {
             let total = 0;
 
@@ -142,6 +149,15 @@ const UIController = (function () {
 
             document.querySelector(Selectors.productList).innerHTML += item;
         },
+
+        deleteProduct : function () {
+          let items = document.querySelectorAll(Selectors.productListItems);
+          items .forEach(function (item) {
+              if(item.classList.contains('bg-warning')) {
+                  item.remove()
+              }
+          })
+        },
         updateProduct : function (prd) {
 
             let updatedItem = null;
@@ -159,6 +175,7 @@ const UIController = (function () {
             return updatedItem;
 
         },
+
         clearInputs: function () {
             document.querySelector(Selectors.productName).value = '';
             document.querySelector(Selectors.productPrice).value = '';
@@ -225,6 +242,8 @@ const App = (function (ProductCtrl, UICtrl) {
 
         document.querySelector(UISelectors.cancelButton).addEventListener('click',cancelUpdate);
 
+        document.querySelector(UISelectors.deleteButton).addEventListener('click',deleteProductSubmit);
+
     }
 
     const productAddSubmit = function (e) {
@@ -264,6 +283,8 @@ const App = (function (ProductCtrl, UICtrl) {
 
             ProductCtrl.setCurrentProduct(product);
 
+            UICtrl.clearWarnings();
+
             UICtrl.addProductToForm();
 
             UICtrl.editState(e.target.parentNode.parentNode);
@@ -285,7 +306,6 @@ const App = (function (ProductCtrl, UICtrl) {
             UICtrl.showTotal(total);
 
             UICtrl.addingState();
-
         }
 
         e.preventDefault();
@@ -295,6 +315,21 @@ const App = (function (ProductCtrl, UICtrl) {
          UICtrl.addingState();
          UICtrl.clearWarnings();
 
+        e.preventDefault();
+    }
+
+
+    const deleteProductSubmit = function (e) {
+        const selectedProduct = ProductCtrl.getCurrentProduct();
+        ProductCtrl.deleteProduct(selectedProduct);
+        UICtrl.deleteProduct(selectedProduct);
+        const total = ProductCtrl.getTotal();
+        UICtrl.showTotal(total);
+
+        UICtrl.addingState();
+        if(total == 0) {
+            UICtrl.hideCard()
+        }
         e.preventDefault();
     }
 
