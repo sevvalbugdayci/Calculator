@@ -27,6 +27,29 @@ const StorageController = (function () {
             }
 
             return products;
+        },
+        updateProduct : function (product) {
+            let products = JSON.parse(localStorage.getItem('products'))
+
+            products.forEach(function (prd,index) {
+                if(products.id == prd.id) {
+                    products.splice(index,1,product);
+                }
+            })
+
+            localStorage.setItem('products',JSON.stringify(products));
+        },
+
+        deleteProduct : function (id) {
+            let products = JSON.parse(localStorage.getItem('products'))
+
+            products.forEach(function (prd,index) {
+                if(products.id == prd.id) {
+                    products.splice(index,1);
+                }
+            })
+
+            localStorage.setItem('products',JSON.stringify(products));
         }
     }
 
@@ -336,6 +359,7 @@ const App = (function (ProductCtrl, UICtrl,StorageCtrl) {
 
             const total = ProductCtrl.getTotal();
             UICtrl.showTotal(total);
+            StorageCtrl.updateProduct(updatedProduct);
 
             UICtrl.addingState();
         }
@@ -357,6 +381,8 @@ const App = (function (ProductCtrl, UICtrl,StorageCtrl) {
         UICtrl.deleteProduct(selectedProduct);
         const total = ProductCtrl.getTotal();
         UICtrl.showTotal(total);
+
+        StorageCtrl.deleteProduct(selectedProduct.id);
 
         UICtrl.addingState();
         if(total == 0) {
